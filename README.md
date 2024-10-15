@@ -18,7 +18,7 @@ MusicLang is a programming language designed for composing music through code. T
 - **Examples**: 
     - chord C4 D4 (C and D played together)
     - chord A3 C5 E5 (A, C, and E played simultaneously)
-- **Pattern**: chord (A-G(#[0-9]+|b[0-9]*)?[0-9]+)(?: (A-G(#[0-9]+|b[0-9]*)?[0-9]+))+
+- **Pattern**: chord (A-G(#[0-9]+|b[0-9]\*)?[0-9]+)(?: (A-G(#[0-9]+|b[0-9]*)?[0-9]+))+
 
 ### 3. Duration
 - **Description**: Represents the length of time a note or chord is played, often specified in beats or fractions of a beat.
@@ -45,3 +45,4 @@ MusicLang is a programming language designed for composing music through code. T
 - **Description**: Represents the action of sharing a musical composition or code.
 - **Examples**: share
 - **Pattern**: share
+
