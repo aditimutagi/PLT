@@ -1,3 +1,5 @@
+import sys
+
 class MusicLangScanner:
     def __init__(self, code):
         self.code = code
@@ -7,41 +9,42 @@ class MusicLangScanner:
     def transition(self, state, token_type):
         # Transition function δ(state, token)
         if state == 'S0':
-            if token_type == 'PLAY':
-                return 'S1'
-            elif token_type == 'NOTE':
-                return 'S2'
-            elif token_type == 'CHORD':
-                return 'S4'
-            elif token_type == 'SHARE':
-                return 'S5'
-        elif state == 'S1':
             if token_type == 'NOTE':
-                return 'S2'
+                return 'S1'
             elif token_type == 'CHORD':
+                return 'S3' 
+            elif token_type == 'SHARE':
                 return 'S4'
-        elif state == 'S2':
+            elif token_type == 'SAVE':
+                return 'S4'
+            elif token_type == 'PLAY':
+                return 'S4'
+        elif state == 'S1':
             if token_type == 'DURATION':
+                return 'S2'
+        elif state == 'S2':
+            if token_type == 'NOTE':
+                return 'S1'
+            elif token_type == 'DURATION': # TEMPO
+                return 'S4'
+            elif token_type == 'CHORD':
                 return 'S3'
         elif state == 'S3':
-            if token_type == 'NOTE':
+            if token_type == 'DURATION':
                 return 'S2'
-            elif token_type == 'DURATION': # TEMPO
-                return 'S5'
-            elif token_type == 'CHORD':
-                return 'S4'
+            elif token_type == 'NOTE':
+                return 'S3'
         elif state == 'S4':
             if token_type == 'NOTE':
-                return 'S2'
-            if token_type == 'DURATION':
-                return 'S3'
-        elif state == 'S5':
-            if token_type == 'NOTE':
-                return 'S2'
+                return 'S1'
             elif token_type == 'CHORD':
+                return 'S3'
+            elif token_type == 'SHARE':
                 return 'S4'
-            if token_type == 'SHARE':
-                return 'S5'
+            elif token_type == 'PLAY':
+                return 'S4'
+            elif token_type == 'SAVE':
+                return 'S4'
         # If no valid transition found, go to error state
         return 'Serr'
 
@@ -51,7 +54,7 @@ class MusicLangScanner:
 
     def is_note_or_chord(self, token):
         note_pattern = 'ABCDEFG'
-        if token.startswith('chord'):
+        if token == 'chord':
             return 'CHORD'
         if len(token) > 2 and token[1] in ('#', 'b') and token[0] in note_pattern and token[2].isdigit():
             return 'NOTE'
@@ -76,6 +79,11 @@ class MusicLangScanner:
             return 'SHARE'
         return None
 
+    def is_save(self, token):
+        if token in 'save':
+            return 'SAVE'
+        return None
+
     def scan(self):
         state = 'S0'
 
@@ -95,10 +103,9 @@ class MusicLangScanner:
 
             token = self.code[token_start:self.current_index].strip()
 
-            # Handle chords with parentheses
-            if token.startswith('chord'):
+            # Handle chords 
+            if token == 'chord':
                 self.current_index += 1
-                chord_token = token
                 # Check for opening parenthesis
                 if self.current_index < len(self.code) and self.code[self.current_index] == '(':
                     self.current_index += 1
@@ -120,8 +127,7 @@ class MusicLangScanner:
                         if self.is_note_or_chord(note) == 'NOTE':
                             notes.append(note)
                         else:
-                            print(f"ERROR: Invalid note '{note}' in chord")
-                            return []
+                            return f"Rejected: Invalid note '{note}' in chord", self.tokens
                             
                         # Handle optional whitespace and commas
                         while self.current_index < len(self.code) and (self.is_whitespace(self.code[self.current_index]) or self.code[self.current_index] == ','):
@@ -129,15 +135,14 @@ class MusicLangScanner:
                     
                     # Check if we exited the loop due to reaching the closing parenthesis
                     if len(notes) > 0:
+                        self.tokens.append(('CHORD', token))
                         self.tokens.append(('CHORD', ' '.join(notes)))
                         token_type = 'CHORD'
                     else:
-                        print("ERROR: Missing notes in chord")
-                        return []
+                        return f"Rejected: Missing notes in chord", self.tokens
 
                 else:
-                    print("ERROR: Missing opening parenthesis for chord")
-                    return []
+                    return f"Rejected: Missing opening parenthesis for chord", self.tokens
 
             else:
                 # Check if the token represents an action, note, or duration
@@ -145,34 +150,46 @@ class MusicLangScanner:
                     self.is_share(token) or
                     self.is_play(token) or
                     self.is_duration(token) or
-                    self.is_note_or_chord(token)
+                    self.is_note_or_chord(token) or
+                    self.is_save(token)
                 )
 
+            if token_type == None:
+                return f"Rejected: Invalid token '{token}'", self.tokens
+            
             # Perform state transition based on the token type
             new_state = self.transition(state, token_type)
             if new_state == 'Serr':
-                print(f"ERROR: Invalid token sequence at '{token}'")
-                return []  # Return an empty list if an error occurs
-            # Update the state and add the token to the list
+                return f"Rejected: Invalid token sequence at '{token}'", self.tokens
+
             state = new_state
-            if state == 'S5' and token_type == 'DURATION': # means two durations --> tempo provided
+            if state == 'S4' and token_type == 'DURATION': # means two durations --> tempo provided
                 self.tokens.append(('TEMPO', token))
-            else:
+            elif token_type != 'CHORD':
                 self.tokens.append((token_type, token))
 
         # Check if the final state is an accepting state
-        if state in {'S5'}:
-            print("Accepted")
+        if state == 'S4':
+            return "Accepted", self.tokens
+        elif state == 'S1':
+            return "Rejected: Each note should be immediately followed by its duration", self.tokens
+        elif state == 'S2':
+            return "Rejected: Must provide the duration for each note/chord and overall tempo", self.tokens
+        elif state == 'S3':
+            return "Rejected: Chords must be followed by list of notes and specified duration", self.tokens
         else:
-            print("Rejected")
+            return "Rejected: Incomplete or incorrect input sequence", self.tokens
         
-        return self.tokens
-
-
-
+        
 if __name__ == "__main__":
-    code = "play C4 1.0 D4 0.5 E4 0.75 chord (C4 D4) 0.75 130 share" # sample command
+    if len(sys.argv) < 2:
+        print("Usage: python3 scanner.py <music_code>")
+        sys.exit(1)
+
+    code = sys.argv[1]
+    
     scanner = MusicLangScanner(code)
-    tokens = scanner.scan()
+    message, tokens = scanner.scan()
     for token in tokens:
         print(f"<{token[0]}, {token[1]}>")
+    print(message)
