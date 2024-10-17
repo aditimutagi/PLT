@@ -3,6 +3,47 @@
 ## Overview
 MusicLang is a programming language designed for composing music through code. This document outlines the lexical grammar defining the token types used in MusicLang.
 
+## Installation Steps
+Follow these steps to install Python and set up your environment:
+### Install Python
+1. **Download Python** <br>
+Visit the [official Python website](https://www.python.org/downloads/) and download the latest version of Python.
+
+2. **Run Installer** <br>
+    - Open the downloaded installer file and follow the instructions.
+    - Make sure to check the box that says "Add Python to PATH" before clicking "Install Now." This ensures that Python can be run from the command line.
+
+3. **Verify Python Installation** <br>
+- After the installation is complete, open a terminal or command prompt and run: <br>
+
+      python --version
+  You should see the version of Python you just installed (e.g., Python 3.13.0).
+
+
+## How To Run
+### 1. Clone repository
+Clone this repository to local machine.
+    
+    git clone https://github.com/aditimutagi/PLT.git
+    
+### 2. Install Dependencies
+Currently no dependencies, so no need to run the following command.
+
+    pip install -r requirements.txt
+
+### 3. Run Shell Script
+Use the following command to run the shell script that will execute the Python program. Replace [input] with intended input.
+
+    ./script.sh '[input]'
+    
+    ./script.sh 'chord (D3 C5) 0.75 A3 0.5 E5 1 150 play'
+
+Make sure the shell script has execute permissions. If not, grant execute permissions using:
+
+    chmod +x run_program.sh
+
+Reference the following section for examples of valid tokens and sequences.
+
 ## Token Types
 
 ### 1. Note
@@ -84,7 +125,8 @@ Note the following DFA diagram that illustrates the state transitions for this s
 ### Example State Transition 
 Take the following working example : **chord (D3 C5) 0.75 A3 0.5 E5 1 150 play**
 
- 1. START --> S0
+ 1. START <br>
+    State: **S0**
  2. Read the token: **chord** <br>
     State: **S3**
  3. Read the token: **(** <br>
