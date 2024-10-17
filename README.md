@@ -27,6 +27,7 @@ MusicLang is a programming language designed for composing music through code. T
     - 0.5 (half a beat)
     - 0.75 (three-quarters of a beat)
 - **Pattern**: (1|0\.[0-9]+|0?[1-9])
+- **Special Rule**: If two "duration" tokens appear consecutively, the second one is interpreted as a "tempo" instead of a "duration." This allows specifying both the length of the previous note/chord and the tempo for the previous section.
 
 ### 4. Tempo
 - **Description**: Represents the speed of the music, commonly defined in beats per minute (BPM). Tempo affects the overall pace of the composition.
@@ -35,6 +36,7 @@ MusicLang is a programming language designed for composing music through code. T
     - 120 (120 BPM)
     - 90 (90 BPM)
 - **Pattern**: ([0-9]+(\.[0-9]+)?)
+- **Special Rule**: A token is recognized as a "tempo" if it's identified as a "duration" and immediately follows another "duration" token. This rule distinguishes between the duration of a preceding note or chord and the tempo setting for the composition. The first duration specifies the length of the note or chord, while the second duration serves as the tempo indicator.
 
 ### 5. Play
 - **Description**: Represents the action of playing a note or chord.
@@ -76,7 +78,7 @@ Note the following DFA diagram that illustrates the state transitions for this s
 - **Serr: REJECT** Invalid sequence of tokens.
 
 
-![alt text](./DFA_Diagram.jpeg)
+![alt text](./img/DFA_Diagram.jpeg)
 
 
 ### Example State Transition 
@@ -114,6 +116,6 @@ Scanner ends in the accepting state **S4** which means all tokens are valid, so 
 
 #### Sample Scanner Output:
 
-![alt text](./State_Transitions_Example.png)
+![alt text](./img/State_Transitions_Example.png)
 
 
