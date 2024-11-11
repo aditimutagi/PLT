@@ -1,4 +1,5 @@
 import sys
+from ast_parser import AST_Parser
 
 class MusicLangScanner:
     def __init__(self, code):
@@ -35,11 +36,7 @@ class MusicLangScanner:
             elif token_type == 'NOTE':
                 return 'S3'
         elif state == 'S4':
-            if token_type == 'NOTE':
-                return 'S1'
-            elif token_type == 'CHORD':
-                return 'S3'
-            elif token_type == 'SHARE':
+            if token_type == 'SHARE':
                 return 'S4'
             elif token_type == 'PLAY':
                 return 'S4'
@@ -135,8 +132,7 @@ class MusicLangScanner:
                     
                     # Check if we exited the loop due to reaching the closing parenthesis
                     if len(notes) > 0:
-                        self.tokens.append(('CHORD', token))
-                        self.tokens.append(('CHORD', ' '.join(notes)))
+                        self.tokens.append(('CHORD', token + " (" + ' '.join(notes) + ")"))
                         token_type = 'CHORD'
                     else:
                         return f"Rejected: Missing notes in chord", self.tokens
@@ -193,3 +189,12 @@ if __name__ == "__main__":
     for token in tokens:
         print(f"<{token[0]}, {token[1]}>")
     print(message)
+
+    if message == "Accepted":
+        # Pass tokens to the parser
+        parser = AST_Parser(tokens)
+        ast = parser.parse()
+        print("Generated AST:")
+        parser.print_ast(ast)
+    else:
+        print("Cannot parse; input rejected by scanner.")
