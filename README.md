@@ -119,7 +119,7 @@ Note the following DFA diagram that illustrates the state transitions for this s
 - **Serr: REJECT** Invalid sequence of tokens.
 
 
-![alt text](./img/DFA_Diagram.jpeg)
+![alt text](./img/DFA_Diagram.jpg)
 
 
 ### Example State Transition 
