@@ -161,3 +161,22 @@ Scanner ends in the accepting state **S4** which means all tokens are valid, so 
 ![alt text](./img/State_Transitions_Example.png)
 
 
+## AST Tree Mapping
+```plaintext
+S: 
+  Composition: 
+    Sequence: 
+      Element: 
+        NoteElement: 
+          Note: C4
+          Duration: 0.5
+      Element: 
+        NoteElement: 
+          Note: D2
+          Duration: 0.7
+    Tempo: 120
+  Command: 
+    CommandAction: play
+```
+
+![My Image](img/AST.png)
