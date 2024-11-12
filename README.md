@@ -160,6 +160,41 @@ Scanner ends in the accepting state **S4** which means all tokens are valid, so 
 
 ![alt text](./img/State_Transitions_Example.png)
 
+## Grammar Definition 
+```plaintext
+Terminals: 
+Note: A-G(#[0-9]+|b[0-9]*)?[0-9] 
+Chord: chord 
+Duration: (1|0.[0-9]+|0?[1-9]) 
+Tempo: [0-9]+(.[0-9]+)? 
+Play: play 
+Share: share 
+Save: save
+()
+
+Non-terminals:
+Composition: Represents a complete musical composition, ending with a tempo.
+Sequence: A series of musical elements, either notes or chords, each followed by a duration.
+Element: A basic musical component, which can be a note or a chord.
+NoteElement: A note followed by its duration.
+ChordElement: A chord followed by its duration.
+ChordNotes: A sequence of notes within a chord
+PlayCommand: Optional command to start playing
+Command: Optional actions after creating composition.
+CommandAction: Possible actions to finalize composition (play, share, save)
+
+Production Rules: 
+S -> Composition Command
+Composition -> Sequence Tempo | ε
+Sequence -> Element Sequence | Element
+Element -> NoteElement | ChordElement
+NoteElement -> Note Duration
+ChordElement -> Chord (ChordNotes) Duration
+ChordNotes -> Note ChordNotes | Note
+Command -> CommandAction Command | CommandAction
+CommandAction -> Play | Share | Save
+```
+
 
 ## AST Tree Mapping
 ```plaintext
