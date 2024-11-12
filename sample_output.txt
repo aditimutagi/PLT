@@ -1,0 +1,82 @@
+1. Simple Note Sequence
+C4 0.5 D4 0.5 E4 0.5 120 play
+Composition:
+  Sequence:
+    Element:
+      Note: C4
+      Duration: 0.5
+    Element:
+      Note: D4
+      Duration: 0.5
+    Element:
+      Note: E4
+      Duration: 0.5
+  Tempo: 120
+  Command:
+    CommandAction: play
+
+2: Chord and Note Sequence
+chord (C4 E4 G4) 1.0 A4 0.5 100 share
+Composition: 
+  Sequence: 
+    Element: 
+      ChordElement: 
+        Chord: chord
+        LeftParen: (
+        ChordNotes: C4 E4 G4
+        RightParen: )
+        Duration: 1.0
+    Element: 
+      NoteElement: 
+        Note: A4
+        Duration: 0.5
+  Tempo: 100
+  Command: 
+    CommandAction: share
+
+3. Multiple Commands
+F4 0.25 G4 0.25 140 save play
+Composition: 
+  Sequence: 
+    Element: 
+      NoteElement: 
+        Note: F4
+        Duration: 0.25
+    Element: 
+      NoteElement: 
+        Note: G4
+        Duration: 0.25
+  Tempo: 140
+  Command: 
+    CommandAction: save
+    CommandAction: play
+
+4. Nested Chords and Notes
+chord (A4 C5 E5) 1.0 chord (D4 F#4 A4) 0.5 90 play
+Composition: 
+  Sequence: 
+    Element: 
+      ChordElement: 
+        Chord: chord
+        LeftParen: (
+        ChordNotes: A4 C5 E5
+        RightParen: )
+        Duration: 1.0
+    Element: 
+      ChordElement: 
+        Chord: chord
+        LeftParen: (
+        ChordNotes: D4 F#4 A4
+        RightParen: )
+        Duration: 0.5
+  Tempo: 90
+  Command: 
+    CommandAction: play
+
+4. Error Handling - Missing Duration
+B4 G4 0.5 120 play
+ValueError: Each note should be immediately followed by its duration
+
+5. Error Handling - Missing Tempo
+C4 0.5 D4 0.5 play
+ValueError: Expected a tempo after the sequence

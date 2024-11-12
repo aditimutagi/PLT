@@ -26,6 +26,8 @@ class AST_Parser:
             composition_node.add_child(self.parse_sequence())
         if self.match("TEMPO"):
             composition_node.add_child(self.parse_tempo())
+        else:
+            raise ValueError("Expected a tempo after the sequence")
         if self.match("PLAY") or self.match("SHARE") or self.match("SAVE"):
             composition_node.add_child(self.parse_command())
         return composition_node
@@ -56,12 +58,19 @@ class AST_Parser:
         chord_element_node.add_child(ASTNode("ChordNotes", chord_notes))
         chord_element_node.add_child(ASTNode("RightParen", ")"))
         
+        if not self.match("DURATION"):
+            raise ValueError("Rejected: Chords must be followed by list of notes and specified duration")
+        
         chord_element_node.add_child(self.parse_duration())
         return chord_element_node
 
     def parse_note_element(self):
         note_element_node = ASTNode("NoteElement")
         note_element_node.add_child(ASTNode("Note", self.consume("NOTE")))
+        
+        if not self.match("DURATION"):
+            raise ValueError("Each note should be immediately followed by its duration")
+        
         note_element_node.add_child(self.parse_duration())
         return note_element_node
 

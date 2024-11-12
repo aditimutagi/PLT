@@ -45,7 +45,6 @@ class MusicLangScanner:
         # If no valid transition found, go to error state
         return 'Serr'
 
-
     def is_whitespace(self, char):
         return char in (' ', '\t', '\n')
 
@@ -124,7 +123,8 @@ class MusicLangScanner:
                         if self.is_note_or_chord(note) == 'NOTE':
                             notes.append(note)
                         else:
-                            return f"Rejected: Invalid note '{note}' in chord", self.tokens
+                            #return f"Rejected: Invalid note '{note}' in chord", self.tokens
+                            raise ValueError(f"Rejected: Invalid note '{note}' in chord")
                             
                         # Handle optional whitespace and commas
                         while self.current_index < len(self.code) and (self.is_whitespace(self.code[self.current_index]) or self.code[self.current_index] == ','):
@@ -135,10 +135,12 @@ class MusicLangScanner:
                         self.tokens.append(('CHORD', token + " (" + ' '.join(notes) + ")"))
                         token_type = 'CHORD'
                     else:
-                        return f"Rejected: Missing notes in chord", self.tokens
+                        #return f"Rejected: Missing notes in chord", self.tokens
+                        raise ValueError(f"Rejected: Missing notes in chord")
 
                 else:
-                    return f"Rejected: Missing opening parenthesis for chord", self.tokens
+                    #return f"Rejected: Missing opening parenthesis for chord", self.tokens
+                    raise ValueError(f"Rejected: Missing opening parenthesis for chord")
 
             else:
                 # Check if the token represents an action, note, or duration
@@ -150,13 +152,17 @@ class MusicLangScanner:
                     self.is_save(token)
                 )
 
+            print(token_type)
+
             if token_type == None:
-                return f"Rejected: Invalid token '{token}'", self.tokens
+                #return f"Rejected: Invalid token '{token}'", self.tokens
+                raise ValueError(f"Rejected: Invalid token '{token}'")
             
             # Perform state transition based on the token type
             new_state = self.transition(state, token_type)
-            if new_state == 'Serr':
-                return f"Rejected: Invalid token sequence at '{token}'", self.tokens
+            
+            #if new_state == 'Serr':
+            #    return f"Rejected: Invalid token sequence at '{token}'", self.tokens
 
             state = new_state
             if state == 'S4' and token_type == 'DURATION': # means two durations --> tempo provided
@@ -164,6 +170,8 @@ class MusicLangScanner:
             elif token_type != 'CHORD':
                 self.tokens.append((token_type, token))
 
+
+        return "Accepted", self.tokens
         # Check if the final state is an accepting state
         if state == 'S4':
             return "Accepted", self.tokens
@@ -192,6 +200,7 @@ if __name__ == "__main__":
 
     if message == "Accepted":
         # Pass tokens to the parser
+        print(tokens)
         parser = AST_Parser(tokens)
         ast = parser.parse()
         print("Generated AST:")
