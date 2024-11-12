@@ -99,7 +99,7 @@ class MusicLangScanner:
 
             token = self.code[token_start:self.current_index].strip()
 
-            # Handle chords 
+            # Handle chords : must be formatted as "chord (note note note...)"
             if token == 'chord':
                 self.current_index += 1
                 # Check for opening parenthesis
@@ -107,11 +107,12 @@ class MusicLangScanner:
                     self.current_index += 1
                     notes = []
                     while self.current_index < len(self.code):
-                        # Break if we reach the closing parenthesis
+                        # Check if we have reached the closing parenthesis
                         if self.code[self.current_index] == ')':
                             self.current_index += 1
                             break
                         
+                        # Extract a potential note
                         note_start = self.current_index
                         while (self.current_index < len(self.code) and 
                             not self.is_whitespace(self.code[self.current_index]) and 
@@ -119,28 +120,31 @@ class MusicLangScanner:
                             self.code[self.current_index] != ')'):  # Include check for closing parenthesis
                             self.current_index += 1
 
+                        # Validate and add note
                         note = self.code[note_start:self.current_index].strip()
                         if self.is_note_or_chord(note) == 'NOTE':
                             notes.append(note)
                         else:
-                            #return f"Rejected: Invalid note '{note}' in chord", self.tokens
                             raise ValueError(f"Rejected: Invalid note '{note}' in chord")
                             
                         # Handle optional whitespace and commas
                         while self.current_index < len(self.code) and (self.is_whitespace(self.code[self.current_index]) or self.code[self.current_index] == ','):
                             self.current_index += 1
                     
-                    # Check if we exited the loop due to reaching the closing parenthesis
+                    # Check if we exited the loop with a closing parenthesis
+                    if self.current_index == len(self.code) or self.code[self.current_index - 1] != ')':
+                        raise ValueError("Rejected: Missing closing parenthesis for chord")
+
+                    # Check if there are valid notes inside the chord
                     if len(notes) > 0:
-                        self.tokens.append(('CHORD', token + " (" + ' '.join(notes) + ")"))
+                        chord_format = f"chord ({' '.join(notes)})"
+                        self.tokens.append(('CHORD', chord_format))
                         token_type = 'CHORD'
                     else:
-                        #return f"Rejected: Missing notes in chord", self.tokens
-                        raise ValueError(f"Rejected: Missing notes in chord")
+                        raise ValueError("Rejected: Missing notes in chord")
 
                 else:
-                    #return f"Rejected: Missing opening parenthesis for chord", self.tokens
-                    raise ValueError(f"Rejected: Missing opening parenthesis for chord")
+                    raise ValueError("Rejected: Missing opening parenthesis for chord")
 
             else:
                 # Check if the token represents an action, note, or duration
@@ -152,39 +156,20 @@ class MusicLangScanner:
                     self.is_save(token)
                 )
 
-            print(token_type)
-
             if token_type == None:
-                #return f"Rejected: Invalid token '{token}'", self.tokens
                 raise ValueError(f"Rejected: Invalid token '{token}'")
             
             # Perform state transition based on the token type
             new_state = self.transition(state, token_type)
             
-            #if new_state == 'Serr':
-            #    return f"Rejected: Invalid token sequence at '{token}'", self.tokens
-
             state = new_state
             if state == 'S4' and token_type == 'DURATION': # means two durations --> tempo provided
                 self.tokens.append(('TEMPO', token))
             elif token_type != 'CHORD':
                 self.tokens.append((token_type, token))
 
+        return "Tokens accepted by scanner \n", self.tokens, state
 
-        return "Accepted", self.tokens
-        # Check if the final state is an accepting state
-        if state == 'S4':
-            return "Accepted", self.tokens
-        elif state == 'S1':
-            return "Rejected: Each note should be immediately followed by its duration", self.tokens
-        elif state == 'S2':
-            return "Rejected: Must provide the duration for each note/chord and overall tempo", self.tokens
-        elif state == 'S3':
-            return "Rejected: Chords must be followed by list of notes and specified duration", self.tokens
-        else:
-            return "Rejected: Incomplete or incorrect input sequence", self.tokens
-        
-        
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python3 scanner.py <music_code>")
@@ -192,18 +177,22 @@ if __name__ == "__main__":
 
     code = sys.argv[1]
     
-    scanner = MusicLangScanner(code)
-    message, tokens = scanner.scan()
-    for token in tokens:
-        print(f"<{token[0]}, {token[1]}>")
-    print(message)
+    try:
+        scanner = MusicLangScanner(code)
+        message, tokens, state = scanner.scan()
+        for token in tokens:
+            print(f"<{token[0]}, {token[1]}>")
+        print(message)
 
-    if message == "Accepted":
-        # Pass tokens to the parser
-        print(tokens)
-        parser = AST_Parser(tokens)
-        ast = parser.parse()
-        print("Generated AST:")
-        parser.print_ast(ast)
-    else:
-        print("Cannot parse; input rejected by scanner.")
+        if "accepted" in message:
+            # Pass tokens to the parser
+            parser = AST_Parser(tokens)
+            try:
+                ast = parser.parse()
+                print("Generated AST:")
+                parser.print_ast(ast)
+            except ValueError as e:
+                print("Parsing ValueError:\n", e, "\n")
+    except ValueError as e:
+        print("Scanner ValueError:\n", e)
+        print("Cannot parse: input rejected by scanner.\n")

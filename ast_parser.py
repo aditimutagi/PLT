@@ -7,64 +7,97 @@ class ASTNode:
     def add_child(self, child):
         self.children.append(child)
 
-
 class AST_Parser:
     def __init__(self, tokens):
         self.tokens = tokens
         self.current_index = 0
 
     def parse(self):
-        root = self.parse_composition()
-        if root and self.current_index == len(self.tokens):
-            return root
-        else:
-            raise ValueError("Parsing error: incomplete or incorrect input")
+        root = ASTNode("S")  # Start symbol
+        composition_node = self.parse_composition()
+        if composition_node:
+            root.add_child(composition_node)
+        
+        # Parse the Command part of the grammar
+        command_node = self.parse_command()
+        if not command_node:
+            raise ValueError("Expected a command (PLAY, SHARE, or SAVE) after composition")
+        
+        root.add_child(command_node)
+        
+        # Check for completeness
+        if self.current_index != len(self.tokens):
+            raise ValueError("Extra tokens found after command")
+        
+        return root
 
     def parse_composition(self):
+        # Composition -> Sequence Tempo | ε
         composition_node = ASTNode("Composition")
-        if self.match("CHORD") or self.match("NOTE"):
-            composition_node.add_child(self.parse_sequence())
-        if self.match("TEMPO"):
+        sequence_node = self.parse_sequence()
+        
+        if sequence_node:
+            composition_node.add_child(sequence_node)
+            if not self.match("TEMPO"):
+                raise ValueError("Expected a TEMPO after sequence")
             composition_node.add_child(self.parse_tempo())
-        else:
-            raise ValueError("Expected a tempo after the sequence")
-        if self.match("PLAY") or self.match("SHARE") or self.match("SAVE"):
-            composition_node.add_child(self.parse_command())
+        
         return composition_node
 
     def parse_sequence(self):
+        # Sequence -> Element Sequence | Element
         sequence_node = ASTNode("Sequence")
-        while self.match("CHORD") or self.match("NOTE"):
+        element_node = self.parse_element()
+        
+        if not element_node:
+            return None
+        
+        sequence_node.add_child(element_node)
+        
+        # Add any additional elements recursively
+        while self.match("NOTE") or self.match("CHORD"):
             sequence_node.add_child(self.parse_element())
+        
         return sequence_node
 
     def parse_element(self):
         element_node = ASTNode("Element")
-        if self.match("CHORD"):
-            element_node.add_child(self.parse_chord_element())
-        elif self.match("NOTE"):
+        if self.match("NOTE"):
             element_node.add_child(self.parse_note_element())
+        elif self.match("CHORD"):
+            element_node.add_child(self.parse_chord_element())
+        else:
+            return None  # Not an Element
+        
         return element_node
 
     def parse_chord_element(self):
+        # ChordElement -> Chord (ChordNotes) Duration
         chord_element_node = ASTNode("ChordElement")
-    
         chord_token = self.consume("CHORD")
-        chord_keyword, chord_notes = chord_token.split(" ", 1)  # chord_keyword is "chord", chord_notes is "(D3 C5)"
+        
+        chord_keyword, chord_notes = chord_token.split(" ", 1)
         chord_notes = chord_notes.strip("()")
         
         chord_element_node.add_child(ASTNode("Chord", chord_keyword))
         chord_element_node.add_child(ASTNode("LeftParen", "("))
-        chord_element_node.add_child(ASTNode("ChordNotes", chord_notes))
+        
+        # Parse ChordNotes
+        chord_notes_node = ASTNode("ChordNotes")
+        for note in chord_notes.split():
+            chord_notes_node.add_child(ASTNode("Note", note))
+        
+        chord_element_node.add_child(chord_notes_node)
         chord_element_node.add_child(ASTNode("RightParen", ")"))
         
         if not self.match("DURATION"):
-            raise ValueError("Rejected: Chords must be followed by list of notes and specified duration")
+            raise ValueError("Rejected: Chords must be followed by specified duration")
         
         chord_element_node.add_child(self.parse_duration())
         return chord_element_node
 
     def parse_note_element(self):
+        # NoteElement -> Note Duration
         note_element_node = ASTNode("NoteElement")
         note_element_node.add_child(ASTNode("Note", self.consume("NOTE")))
         
@@ -81,9 +114,12 @@ class AST_Parser:
         return ASTNode("Tempo", self.consume("TEMPO"))
 
     def parse_command(self):
+        # Command -> CommandAction Command
         command_node = ASTNode("Command")
         while self.match("PLAY") or self.match("SHARE") or self.match("SAVE"):
             command_node.add_child(ASTNode("CommandAction", self.consume(self.tokens[self.current_index][0])))
+        if len(command_node.children) == 0:
+            return None
         return command_node
 
     def match(self, expected_type):
