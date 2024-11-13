@@ -73,10 +73,9 @@ Reference the following section for examples of valid tokens and sequences.
 ### 4. Tempo
 - **Description**: Represents the speed of the music, commonly defined in beats per minute (BPM). Tempo affects the overall pace of the composition.
 - **Examples**: 
-    - 1.5 (indicating the tempo for a section)
     - 120 (120 BPM)
     - 90 (90 BPM)
-- **Pattern**: ([0-9]+(\.[0-9]+)?)
+- **Pattern**: [1-9][0-9]*
 - **Special Rule**: A token is recognized as a "tempo" if it's identified as a "duration" and immediately follows another "duration" token. This rule distinguishes between the duration of a preceding note or chord and the tempo setting for the composition. The first duration specifies the length of the note or chord, while the second duration serves as the tempo indicator.
 
 ### 5. Play
@@ -160,4 +159,59 @@ Scanner ends in the accepting state **S4** which means all tokens are valid, so 
 
 ![alt text](./img/State_Transitions_Example.png)
 
+## Grammar Definition 
+```plaintext
+Terminals: 
+Note: A-G(#[0-9]+|b[0-9]*)?[0-9] 
+Chord: chord 
+Duration: (1|0.[0-9]+|0?[1-9]) 
+Tempo: [1-9][0-9]*
+Play: play 
+Share: share 
+Save: save
+LeftParen: (
+RightParen: )
 
+Non-terminals:
+Composition: Represents a complete musical composition, ending with a tempo.
+Sequence: A series of musical elements, either notes or chords, each followed by a duration.
+Element: A basic musical component, which can be a note or a chord.
+NoteElement: A note followed by its duration.
+ChordElement: A chord followed by its duration.
+ChordNotes: A sequence of notes within a chord
+PlayCommand: Optional command to start playing
+Command: Optional actions after creating composition.
+CommandAction: Possible actions to finalize composition (play, share, save)
+
+Production Rules: 
+S -> Composition Command
+Composition -> Sequence Tempo | ε
+Sequence -> Element Sequence | Element
+Element -> NoteElement | ChordElement
+NoteElement -> Note Duration
+ChordElement -> Chord (ChordNotes) Duration
+ChordNotes -> Note ChordNotes | Note
+Command -> CommandAction Command | CommandAction
+CommandAction -> Play | Share | Save
+```
+
+
+## AST Tree Mapping
+```plaintext
+S: 
+  Composition: 
+    Sequence: 
+      Element: 
+        NoteElement: 
+          Note: C4
+          Duration: 0.5
+      Element: 
+        NoteElement: 
+          Note: D2
+          Duration: 0.7
+    Tempo: 120
+  Command: 
+    CommandAction: play
+```
+
+![My Image](img/AST.png)
