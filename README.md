@@ -73,10 +73,9 @@ Reference the following section for examples of valid tokens and sequences.
 ### 4. Tempo
 - **Description**: Represents the speed of the music, commonly defined in beats per minute (BPM). Tempo affects the overall pace of the composition.
 - **Examples**: 
-    - 1.5 (indicating the tempo for a section)
     - 120 (120 BPM)
     - 90 (90 BPM)
-- **Pattern**: ([0-9]+(\.[0-9]+)?)
+- **Pattern**: [1-9][0-9]*
 - **Special Rule**: A token is recognized as a "tempo" if it's identified as a "duration" and immediately follows another "duration" token. This rule distinguishes between the duration of a preceding note or chord and the tempo setting for the composition. The first duration specifies the length of the note or chord, while the second duration serves as the tempo indicator.
 
 ### 5. Play
@@ -166,11 +165,12 @@ Terminals:
 Note: A-G(#[0-9]+|b[0-9]*)?[0-9] 
 Chord: chord 
 Duration: (1|0.[0-9]+|0?[1-9]) 
-Tempo: [0-9]+(.[0-9]+)? 
+Tempo: [1-9][0-9]*
 Play: play 
 Share: share 
 Save: save
-()
+LeftParen: (
+RightParen: )
 
 Non-terminals:
 Composition: Represents a complete musical composition, ending with a tempo.
