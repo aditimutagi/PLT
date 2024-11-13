@@ -6,44 +6,6 @@ class MusicLangScanner:
         self.code = code
         self.tokens = []
         self.current_index = 0
-    
-    def transition(self, state, token_type):
-        # Transition function δ(state, token)
-        if state == 'S0':
-            if token_type == 'NOTE':
-                return 'S1'
-            elif token_type == 'CHORD':
-                return 'S3' 
-            elif token_type == 'SHARE':
-                return 'S4'
-            elif token_type == 'SAVE':
-                return 'S4'
-            elif token_type == 'PLAY':
-                return 'S4'
-        elif state == 'S1':
-            if token_type == 'DURATION':
-                return 'S2'
-        elif state == 'S2':
-            if token_type == 'NOTE':
-                return 'S1'
-            elif token_type == 'DURATION': # TEMPO
-                return 'S4'
-            elif token_type == 'CHORD':
-                return 'S3'
-        elif state == 'S3':
-            if token_type == 'DURATION':
-                return 'S2'
-            elif token_type == 'NOTE':
-                return 'S3'
-        elif state == 'S4':
-            if token_type == 'SHARE':
-                return 'S4'
-            elif token_type == 'PLAY':
-                return 'S4'
-            elif token_type == 'SAVE':
-                return 'S4'
-        # If no valid transition found, go to error state
-        return 'Serr'
 
     def is_whitespace(self, char):
         return char in (' ', '\t', '\n')
@@ -61,7 +23,16 @@ class MusicLangScanner:
     def is_duration(self, token):
         try:
             value = float(token)
-            return 'DURATION' if value >= 0 else None
+            if '.' in token and value >= 0:
+                return 'DURATION'
+            return None
+        except ValueError:
+            return None
+
+    def is_tempo(self, token):
+        try:
+            value = int(token)
+            return 'TEMPO' if value >= 0 else None
         except ValueError:
             return None
 
@@ -152,23 +123,18 @@ class MusicLangScanner:
                     self.is_share(token) or
                     self.is_play(token) or
                     self.is_duration(token) or
+                    self.is_tempo(token) or
                     self.is_note_or_chord(token) or
                     self.is_save(token)
                 )
+                self.tokens.append((token_type, token))
 
             if token_type == None:
                 raise ValueError(f"Rejected: Invalid token '{token}'")
             
-            # Perform state transition based on the token type
-            new_state = self.transition(state, token_type)
             
-            state = new_state
-            if state == 'S4' and token_type == 'DURATION': # means two durations --> tempo provided
-                self.tokens.append(('TEMPO', token))
-            elif token_type != 'CHORD':
-                self.tokens.append((token_type, token))
 
-        return "Tokens accepted by scanner \n", self.tokens, state
+        return "Tokens accepted by scanner \n", self.tokens
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -179,7 +145,7 @@ if __name__ == "__main__":
     
     try:
         scanner = MusicLangScanner(code)
-        message, tokens, state = scanner.scan()
+        message, tokens = scanner.scan()
         for token in tokens:
             print(f"<{token[0]}, {token[1]}>")
         print(message)
