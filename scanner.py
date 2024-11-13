@@ -103,7 +103,7 @@ class MusicLangScanner:
                             self.current_index += 1
                     
                     # Check if we exited the loop with a closing parenthesis
-                    if self.current_index == len(self.code) or self.code[self.current_index - 1] != ')':
+                    if self.code[self.current_index - 1] != ')':
                         raise ValueError("Rejected: Missing closing parenthesis for chord")
 
                     # Check if there are valid notes inside the chord

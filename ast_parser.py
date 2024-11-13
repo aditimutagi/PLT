@@ -67,6 +67,10 @@ class AST_Parser:
         sequence_node = self.parse_sequence()   
         if sequence_node:
             composition_node.add_child(sequence_node)
+            
+            if self.current_index >= len(self.tokens):
+                raise ValueError("Incorrect composition: Each sequence should be immediately followed by the tempo")
+
             self.current_state = self.transition(self.current_state, self.tokens[self.current_index][0])
             if self.current_state == 'Serr':
                 raise ValueError("Parsing error: Expected a TEMPO after sequence")
@@ -78,8 +82,10 @@ class AST_Parser:
     def parse_sequence(self):
         # Sequence -> Element Sequence | Element
         sequence_node = ASTNode("Sequence")
-        if not (self.match("NOTE") or self.match("CHORD")):
+        if self.match("SHARE") or self.match("PLAY") or self.match("SAVE"):
             return None
+        elif not(self.match("NOTE") or self.match("CHORD")):
+            raise ValueError("Invalid Composition")
         while self.match("NOTE") or self.match("CHORD"):
             expected_state = self.transition(self.current_state, self.tokens[self.current_index][0])
             if expected_state == 'Serr':
@@ -109,10 +115,13 @@ class AST_Parser:
         # NoteElement -> Note Duration
         note_element_node = ASTNode("NoteElement")
         note_element_node.add_child(ASTNode("Note", self.consume("NOTE")))
+
+        if self.current_index >= len(self.tokens):
+            raise ValueError("Incorrect sequence: Each note should be immediately followed by its duration")
         
         self.current_state = self.transition(self.current_state, self.tokens[self.current_index][0])
         if self.current_state == 'Serr':
-            raise ValueError("Each note should be immediately followed by its duration")
+            raise ValueError("Incorrect sequence: Each note should be immediately followed by its duration")
         
         note_element_node.add_child(self.parse_duration())
         return note_element_node
@@ -135,9 +144,12 @@ class AST_Parser:
         chord_element_node.add_child(chord_notes_node)
         chord_element_node.add_child(ASTNode("RightParen", ")"))
         
+        if self.current_index >= len(self.tokens):
+            raise ValueError("Incorrect sequence: Each chord should be immediately followed by its duration")
+
         self.current_state = self.transition(self.current_state, self.tokens[self.current_index][0])
         if self.current_state == 'Serr':
-            raise ValueError("Each chord should be immediately followed by its duration")
+            raise ValueError("Incorrect sequence: Each chord should be immediately followed by its duration")
         
         chord_element_node.add_child(self.parse_duration())
         return chord_element_node
