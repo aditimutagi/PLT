@@ -36,7 +36,7 @@ Use the following command to run the shell script that will execute the Python p
 
     ./script.sh '[input]'
     
-    ./script.sh 'chord (D3 C5) 0.75 A3 0.5 E5 1 150 play'
+    ./script.sh 'chord (D3 C5) 0.75 A3 0.5 E5 1.0 150 play'
 
 Make sure the shell script has execute permissions. If not, grant execute permissions using:
 
@@ -101,7 +101,7 @@ Note the following key valid token sequences:
 - Each sequence must terminate with a tempo.
 - The sequence may include multiple notes and durations, but must always adhere to the following rules:
     - Valid sequences:
-        - C4 0.5 D3 1 120
+        - C4 0.5 D3 1.0 120
         - (C4 D3) 0.5 120
     - Invalid sequences:
         - C4 : ends on a note without a duration or tempo
@@ -118,7 +118,7 @@ Note the following DFA diagram that illustrates the state transitions for this s
 - **Serr: REJECT** Invalid sequence of tokens.
 
 
-![alt text](./img/DFA_Diagram.jpg)
+![alt text](./img/DFA_Diagram.jpeg)
 
 
 ### Example State Transition 
