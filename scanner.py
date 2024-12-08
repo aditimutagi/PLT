@@ -1,5 +1,7 @@
 import sys
-from ast_parser import AST_Parser, ASTProcessor
+from ast_parser import AST_Parser
+from ast_processor import ASTProcessor
+from ast_optimizer import ASTOptimizer
 
 class MusicLangScanner:
     def __init__(self, code):
@@ -157,6 +159,9 @@ if __name__ == "__main__":
                 ast = parser.parse()
                 print("Generated AST:")
                 parser.print_ast(ast)
+
+                optimizer = ASTOptimizer(ast)
+                optimizer.optimize()
 
                 processor = ASTProcessor(ast)
                 lower_level_output = processor.process()
