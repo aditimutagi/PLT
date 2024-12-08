@@ -10,6 +10,8 @@ class MIDI_LowerLevel:
         self.midi_file = MidiFile()
         self.track = MidiTrack()
         self.midi_file.tracks.append(self.track)
+        self.output_dir = "output"
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def bpm_to_microseconds(self, bpm):
         return int(60000000 / bpm)
@@ -65,9 +67,11 @@ class MIDI_LowerLevel:
 
 
     def save_midi_file(self, filename="output.mid"):
-        self.midi_file.save(filename)
-        print("\nMIDI file saved as 'output.mid'")
-        return filename
+        midi_file_path = os.path.join(self.output_dir, filename)
+        self.midi_file.save(midi_file_path)
+        print(f"\nMIDI file saved to {midi_file_path}")
+        return midi_file_path
+
 
     def play_midi_file(self, midi_file_path):
         # Initialize pygame mixer
