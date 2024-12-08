@@ -1,5 +1,5 @@
 import sys
-from ast_parser import AST_Parser
+from ast_parser import AST_Parser, ASTProcessor
 
 class MusicLangScanner:
     def __init__(self, code):
@@ -157,6 +157,12 @@ if __name__ == "__main__":
                 ast = parser.parse()
                 print("Generated AST:")
                 parser.print_ast(ast)
+
+                processor = ASTProcessor(ast)
+                lower_level_output = processor.process()
+                print("\nGenerated Lower-Level Language Output:")
+                print(lower_level_output)
+
             except ValueError as e:
                 print("Parsing ValueError:\n", e, "\n")
     except ValueError as e:
