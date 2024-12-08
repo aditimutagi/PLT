@@ -1,5 +1,9 @@
 # MusicLang Lexical Grammar
 
+## Group Members
+- Aditi Mutagi (agm2208)
+- Yau Shing Jonathan Cheung (yc4528)
+
 ## Overview
 MusicLang is a programming language designed for composing music through code. This document outlines the lexical grammar defining the token types used in MusicLang.
 
@@ -39,7 +43,7 @@ Use the following command to run the shell script that will execute the Python p
 
 Make sure the shell script has execute permissions. If not, grant execute permissions using:
 
-    chmod +x run_program.sh
+    chmod +x script.sh
 
 Reference the subsequent section (Token Types) for examples of valid tokens and sequences.
 
