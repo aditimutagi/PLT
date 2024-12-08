@@ -27,7 +27,6 @@ Clone this repository to local machine.
     git clone https://github.com/aditimutagi/PLT.git
     
 ### 2. Install Dependencies
-Currently no dependencies, so no need to run the following command.
 
     pip install -r requirements.txt
 
@@ -36,13 +35,30 @@ Use the following command to run the shell script that will execute the Python p
 
     ./script.sh '[input]'
     
-    ./script.sh 'chord (D3 C5) 0.75 A3 0.5 E5 1.0 150 play'
+    C4 1.0 D4 0.5 chord (C4 D4) 0.75 130 save play'
 
 Make sure the shell script has execute permissions. If not, grant execute permissions using:
 
     chmod +x run_program.sh
 
-Reference the following section for examples of valid tokens and sequences.
+Reference the subsequent section (Token Types) for examples of valid tokens and sequences.
+
+### 4. Usage
+
+This program can generate two files based on the input commands:
+- **MIDI file**: This file contains the music sequence and can be played locally, on any MIDI player, or online.
+- **ZIP file**: Contains the MIDI file and is easily shareable.
+
+#### Playing the MIDI Locally
+To play the generated MIDI file locally, run the `play` command, which will trigger a local playback of the music sequence in the terminal. 
+
+#### Online Playback
+You can also test the generated MIDI file online at [https://midiplayer.ehubsoft.net/](https://midiplayer.ehubsoft.net/). Simply upload the generated MIDI file there to listen to it.
+
+#### Additional Notes
+    - When using the `play` or `share` command, the program will automatically save the generated MIDI file locally.
+    - The MIDI and ZIP files will be saved in the `output/` directory by default.
+
 
 ## Token Types
 
@@ -79,17 +95,17 @@ Reference the following section for examples of valid tokens and sequences.
 - **Special Rule**: A token is recognized as a "tempo" if it's identified as a "duration" and immediately follows another "duration" token. This rule distinguishes between the duration of a preceding note or chord and the tempo setting for the composition. The first duration specifies the length of the note or chord, while the second duration serves as the tempo indicator.
 
 ### 5. Play
-- **Description**: Represents the action of playing a note or chord.
+- **Description**: Represents the action of playing a note, chord, or musical composition.
 - **Examples**: play
 - **Pattern**: play
 
 ### 6. Share
-- **Description**: Represents the action of sharing a musical composition or code.
+- **Description**: Represents the action of sharing a musical composition or code by generating a shareable file.
 - **Examples**: share
 - **Pattern**: share
 
 ### 7. Save
-- **Description**: Represents saving the composition.
+- **Description**: Represents saving the composition into a playable file.
 - **Examples**: save
 - **Pattern**: save
 
