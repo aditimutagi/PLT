@@ -1,5 +1,6 @@
 import sys
 from ast_parser import AST_Parser, ASTProcessor
+from lower_level_to_midi import MIDI_LowerLevel
 
 class MusicLangScanner:
     def __init__(self, code):
@@ -162,6 +163,9 @@ if __name__ == "__main__":
                 lower_level_output = processor.process()
                 print("\nGenerated Lower-Level Language Output:")
                 print(lower_level_output)
+
+                midi_gen = MIDI_LowerLevel()
+                command = midi_gen.handle_command(lower_level_output)
 
             except ValueError as e:
                 print("Parsing ValueError:\n", e, "\n")
