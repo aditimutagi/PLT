@@ -56,8 +56,8 @@ To play the generated MIDI file locally, run the `play` command, which will trig
 You can also test the generated MIDI file online at [https://midiplayer.ehubsoft.net/](https://midiplayer.ehubsoft.net/). Simply upload the generated MIDI file there to listen to it.
 
 #### Additional Notes
-    - When using the `play` or `share` command, the program will automatically save the generated MIDI file locally.
-    - The MIDI and ZIP files will be saved in the `output/` directory by default.
+- When using the `play` or `share` command, the program will automatically save the generated MIDI file locally.
+- The MIDI and ZIP files will be saved in the `output/` directory by default.
 
 
 ## Token Types
