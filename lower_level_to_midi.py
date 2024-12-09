@@ -6,7 +6,6 @@ import os
 
 class MIDI_LowerLevel:
     def __init__(self):
-        self.tempo = 120  # Default tempo
         self.midi_file = MidiFile()
         self.track = MidiTrack()
         self.midi_file.tracks.append(self.track)
@@ -36,27 +35,42 @@ class MIDI_LowerLevel:
             self.track.append(Message('note_off', note=note, velocity=64, time=ticks if note == midi_notes[-1] else 0))
 
     def parse_and_generate(self, instructions):
-        # Split the instructions into individual lines
+        """
+        Parses instructions and generates MIDI tracks. Instructions are grouped into
+        sequences that are processed after encountering a TEMPO line.
+        """
         lines = instructions.strip().split("\n")
+        current_sequence = []  # Buffer for instructions
+        current_tempo = None  # No tempo set initially
 
-        # First pass to find and set tempo, as tempo should always be applied first
         for line in lines:
             tokens = line.split()
             action = tokens[0]
-            if action == "TEMPO":
-                bpm = int(tokens[1])
-                self.add_tempo(bpm)
-                # Remove tempo line from further processing
-                lines.remove(line)
-                break  # Exit after processing tempo
 
-        # Parse the remaining lines for notes, chords, and other actions
-        for line in lines:
+            if action == "TEMPO":
+                # If we encounter a tempo, process the previous sequence with the current tempo
+                current_tempo = int(tokens[1])
+                if current_sequence:
+                    if current_tempo is None:
+                        raise ValueError("A TEMPO must be set before notes or chords.")
+                    self.add_tempo(current_tempo)
+                    self.process_sequence(current_sequence)
+                    current_sequence = []  # Reset the sequence buffer
+                
+            else:
+                # Add instruction to the current sequence
+                current_sequence.append(line)
+
+
+    def process_sequence(self, sequence):
+        """
+        Processes a sequence of instructions at the specified tempo.
+        """
+        for line in sequence:
             tokens = line.split()
             action = tokens[0]
-            if action == "TEMPO":
-                continue  # Skip tempo line, already processed
-            elif action == "NOTE":
+
+            if action == "NOTE":
                 midi_note = int(tokens[1])
                 duration = float(tokens[2])
                 self.add_note(midi_note, duration)
@@ -84,10 +98,12 @@ class MIDI_LowerLevel:
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)  # Wait until the music finishes
 
-    def zip_midi_file(self, midi_file_path, shareable_file = "shareable_midi_files.zip"):
-        with zipfile.ZipFile(shareable_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    def zip_midi_file(self, midi_file_path, shareable_file = "shareable_output.zip"):
+        shareable_file_path = os.path.join(self.output_dir, shareable_file)
+        with zipfile.ZipFile(shareable_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             zipf.write(midi_file_path, os.path.basename(midi_file_path))
-        print(f"File {midi_file_path} zipped as {shareable_file}. You can share it via email.")
+        print(f"File {midi_file_path} zipped as {shareable_file_path}. You can share it via email.")
+
 
 
 
