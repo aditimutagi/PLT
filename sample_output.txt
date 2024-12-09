@@ -1,12 +1,32 @@
 1. Simple Note Sequence
-C4 0.5 D4 0.5 E4 0.5 120 play
+C4 1.0 D4 0.5 E4 1.0 C4 0.5 E4 1.0 C4 0.5 E4 1.0 120 play
+
+<NOTE, C4>
+<DURATION, 1.0>
+<NOTE, D4>
+<DURATION, 0.5>
+<NOTE, E4>
+<DURATION, 1.0>
+<NOTE, C4>
+<DURATION, 0.5>
+<NOTE, E4>
+<DURATION, 1.0>
+<NOTE, C4>
+<DURATION, 0.5>
+<NOTE, E4>
+<DURATION, 1.0>
+<TEMPO, 120>
+<PLAY, play>
+Tokens accepted by scanner 
+
+Generated AST:
 S: 
   Composition: 
     Sequence: 
       Element: 
         NoteElement: 
           Note: C4
-          Duration: 0.5
+          Duration: 1.0
       Element: 
         NoteElement: 
           Note: D4
@@ -14,54 +34,51 @@ S:
       Element: 
         NoteElement: 
           Note: E4
+          Duration: 1.0
+      Element: 
+        NoteElement: 
+          Note: C4
           Duration: 0.5
+      Element: 
+        NoteElement: 
+          Note: E4
+          Duration: 1.0
+      Element: 
+        NoteElement: 
+          Note: C4
+          Duration: 0.5
+      Element: 
+        NoteElement: 
+          Note: E4
+          Duration: 1.0
     Tempo: 120
   Command: 
     CommandAction: play
 
-2: Chord and Note Sequence
-chord (C4 E4 G4) 1.0 A4 0.5 100 share
-S: 
-  Composition: 
-    Sequence: 
-      Element: 
-        ChordElement: 
-          Chord: chord
-          LeftParen: (
-          ChordNotes: 
-            Note: C4
-            Note: E4
-            Note: G4
-          RightParen: )
-          Duration: 1.0
-      Element: 
-        NoteElement: 
-          Note: A4
-          Duration: 0.5
-    Tempo: 100
-  Command: 
-    CommandAction: share
+Generated Lower-Level Language Output:
+NOTE 60 1.0
+NOTE 62 0.5
+NOTE 64 1.0
+NOTE 60 0.5
+NOTE 64 1.0
+NOTE 60 0.5
+NOTE 64 1.0
+TEMPO 120
+PLAY
 
-3. Multiple Commands
-F4 0.25 G4 0.25 140 save play
-S: 
-  Composition: 
-    Sequence: 
-      Element: 
-        NoteElement: 
-          Note: F4
-          Duration: 0.25
-      Element: 
-        NoteElement: 
-          Note: G4
-          Duration: 0.25
-    Tempo: 140
-  Command: 
-    CommandAction: save
-    CommandAction: play
+Finally, the code will play the corresponding sound
 
-4. Nested Chords and Notes
+2. Nested Chords and Notes
 chord (A4 C5 E5) 1.0 chord (D4 F#4 A4) 0.5 90 play
+<CHORD, chord (A4 C5 E5)>
+<DURATION, 1.0>
+<CHORD, chord (D4 F#4 A4)>
+<DURATION, 0.5>
+<TEMPO, 90>
+<PLAY, play>
+Tokens accepted by scanner 
+
+Generated AST:
 S: 
   Composition: 
     Sequence: 
@@ -89,12 +106,162 @@ S:
   Command: 
     CommandAction: play
 
+Generated Lower-Level Language Output:
+CHORD 69 72 76 1.0
+CHORD 62 66 69 0.5
+TEMPO 90
+PLAY
+
+Finally, the code will play the corresponding sound
+
+3. Multiple Commands
+chord (C4 E4 G4) 1.0 A4 1.0 B4 1.0 100 play share
+
+<CHORD, chord (C4 E4 G4)>
+<DURATION, 1.0>
+<NOTE, A4>
+<DURATION, 1.0>
+<NOTE, B4>
+<DURATION, 1.0>
+<TEMPO, 100>
+<PLAY, play>
+<SHARE, share>
+Tokens accepted by scanner 
+
+Generated AST:
+S: 
+  Composition: 
+    Sequence: 
+      Element: 
+        ChordElement: 
+          Chord: chord
+          LeftParen: (
+          ChordNotes: 
+            Note: C4
+            Note: E4
+            Note: G4
+          RightParen: )
+          Duration: 1.0
+      Element: 
+        NoteElement: 
+          Note: A4
+          Duration: 1.0
+      Element: 
+        NoteElement: 
+          Note: B4
+          Duration: 1.0
+    Tempo: 100
+  Command: 
+    CommandAction: play
+    CommandAction: share
+
+Generated Lower-Level Language Output:
+CHORD 60 64 67 1.0
+NOTE 69 1.0
+NOTE 71 1.0
+TEMPO 100
+PLAY
+SHARE
+
+The code will play the corresponding sound and save the .mid file to shareable_midi_files.zip
+
+
+4.1 Optimization - Basic simplification of expression 
+chord (A4) 1.0 chord (B4) 1.0 90 play 
+
+<CHORD, chord (A4)>
+<DURATION, 1.0>
+<CHORD, chord (B4)>
+<DURATION, 1.0>
+<TEMPO, 90>
+<PLAY, play>
+Tokens accepted by scanner 
+
+Generated AST:
+S: 
+  Composition: 
+    Sequence: 
+      Element: 
+        ChordElement: 
+          Chord: chord
+          LeftParen: (
+          ChordNotes: 
+            Note: A4
+          RightParen: )
+          Duration: 1.0
+      Element: 
+        ChordElement: 
+          Chord: chord
+          LeftParen: (
+          ChordNotes: 
+            Note: B4
+          RightParen: )
+          Duration: 1.0
+    Tempo: 90
+  Command: 
+    CommandAction: play
+
+Generated Lower-Level Language Output:
+NOTE 69 1.0
+NOTE 71 1.0
+TEMPO 90
+PLAY
+
+Finally, the code will play the corresponding sound
+
+4.1 Optimization - Remove redundant and dead code
+A4 0.0 chord (D3 E4) 0.0 A5 1.0 90 play
+
+<NOTE, A4>
+<DURATION, 0.0>
+<CHORD, chord (D3 E4)>
+<DURATION, 0.0>
+<NOTE, A5>
+<DURATION, 1.0>
+<TEMPO, 90>
+<PLAY, play>
+Tokens accepted by scanner 
+
+Generated AST:
+S: 
+  Composition: 
+    Sequence: 
+      Element: 
+        NoteElement: 
+          Note: A4
+          Duration: 0.0
+      Element: 
+        ChordElement: 
+          Chord: chord
+          LeftParen: (
+          ChordNotes: 
+            Note: D3
+            Note: E4
+          RightParen: )
+          Duration: 0.0
+      Element: 
+        NoteElement: 
+          Note: A5
+          Duration: 1.0
+    Tempo: 90
+  Command: 
+    CommandAction: play
+
+Generated Lower-Level Language Output:
+NOTE 81 1.0
+TEMPO 90
+PLAY
+
+Finally, the code will play the corresponding sound
+
 5.1 Error Handling - Missing Duration
 B4 G4 0.5 120 play
+
 Parsing ValueError:
- Each note should be immediately followed by its duration 
+ Incorrect sequence: Each note should be immediately followed by its duration 
 
 5.2 Error Handling - Missing Tempo
 C4 0.5 D4 0.5 play
+
 Parsing ValueError:
- Expected a TEMPO after sequence 
+ Parsing error: Expected a TEMPO after sequence 
