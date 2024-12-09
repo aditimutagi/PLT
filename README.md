@@ -204,7 +204,7 @@ Command: Optional actions after creating composition.
 CommandAction: Possible actions to finalize composition (play, share, save)
 
 Production Rules: 
-S -> Composition Command
+S -> Composition* Command
 Composition -> Sequence Tempo | ε
 Sequence -> Element Sequence | Element
 Element -> NoteElement | ChordElement
@@ -235,3 +235,60 @@ S:
 ```
 
 ![My Image](img/AST.png)
+
+## AST Optimization
+TO DO
+
+## Lower Level Language
+The Lower Level Language serves as an intermediary step between the AST and the MIDI file format. It provides a structured way to represent musical instructions that can be easily converted into MIDI data.
+
+### Musical Note Conversion
+Notes like C4 (Middle C) are parsed and converted into their numerical equivalents based on the MIDI specifications:
+
+    C4 → 60
+    D4 → 62
+    E4 → 64
+
+### Lower Level Language Syntax
+- NOTE midi_note duration: Plays a single note.
+- CHORD midi_note1 midi_note2 ... duration: Plays multiple notes together
+- TEMPO bpm: Sets the tempo in beats per minute (BPM).
+- SAVE: Generates .mid file, saves it in /output directory
+- PLAY: Saves .mid file and plays it locally using Python library
+- SHARE: Saves .mid file and generates a shareable zip file
+
+#### Example: Generated Lower Level Language
+NOTE 60 1.0
+NOTE 62 0.5
+CHORD 60 62 0.75
+TEMPO 130
+PLAY
+SHARE
+
+
+## Midi File
+MIDI files contain event-based instructions for music playback rather than audio data. This includes:
+- Which notes to play
+- Their durations and velocities
+- Tempo changes
+
+### Command Translation:
+- TEMPO is converted into a set_tempo meta-message.
+- NOTE and CHORD commands are converted into note_on and note_off events with precise timing.
+- DURATION is calculated in ticks (e.g., 480 ticks per beat).
+
+### Generated MIDI file:
+Files: 
+- output/output.mid
+- output/shareable_output.zip
+
+### Testing and Playback
+- If using the command line, adding the `play` command at the end will automatically play the composition locally.
+- Alternatively, open the .mid file in a MIDI editor locally (e.g., GarageBand, Ableton Live) or online at [https://midiplayer.ehubsoft.net/](https://midiplayer.ehubsoft.net/).
+
+### Limitations
+- Currently supports basic events like notes and chords.
+- Does not handle more advanced MIDI features, such as instrument changes or pitch bends.
+
+
+
