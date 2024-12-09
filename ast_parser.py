@@ -36,7 +36,14 @@ class AST_Parser:
                 return 'S2'
             elif token_type == 'NOTE':
                 return 'S3'
-        elif state == 'S4' or state == 'S5':
+        elif state == 'S4':
+            if token_type == 'NOTE':
+                return 'S1'
+            elif token_type == 'CHORD':
+                return 'S3'
+            elif token_type in ['SHARE', 'PLAY', 'SAVE']:
+                return 'S5'
+        elif state == 'S5':
             if token_type in ['SHARE', 'PLAY', 'SAVE']:
                 return 'S5'
         return 'Serr'
@@ -62,22 +69,28 @@ class AST_Parser:
         return root
 
     def parse_composition(self):
-        # Composition -> Sequence Tempo | ε
+        # Composition -> (Sequence Tempo)+ | ε
         composition_node = ASTNode("Composition")
-        sequence_node = self.parse_sequence()   
-        if sequence_node:
-            composition_node.add_child(sequence_node)
-            
-            if self.current_index >= len(self.tokens):
-                raise ValueError("Incorrect composition: Each sequence should be immediately followed by the tempo")
+        while self.current_index < len(self.tokens):
+            # Parse a sequence
+            sequence_node = self.parse_sequence()
+            if sequence_node:
+                composition_node.add_child(sequence_node)
+            else:
+                break
 
+            # Ensure a tempo follows the sequence
+            if self.current_index >= len(self.tokens):
+                raise ValueError("Parsing error: Expected a TEMPO after sequence")
+            
             self.current_state = self.transition(self.current_state, self.tokens[self.current_index][0])
             if self.current_state == 'Serr':
                 raise ValueError("Parsing error: Expected a TEMPO after sequence")
+            
             composition_node.add_child(self.parse_tempo())
-        else: # no composition
-            composition_node.value = "ε"
+
         return composition_node
+
 
     def parse_sequence(self):
         # Sequence -> Element Sequence | Element
@@ -87,6 +100,8 @@ class AST_Parser:
         elif not(self.match("NOTE") or self.match("CHORD")):
             raise ValueError("Invalid Composition")
         while self.match("NOTE") or self.match("CHORD"):
+            print(self.tokens[self.current_index][0])
+            print(self.current_state)
             expected_state = self.transition(self.current_state, self.tokens[self.current_index][0])
             if expected_state == 'Serr':
                 raise ValueError(f"Incorrect sequence at '{self.tokens[self.current_index][1]}'")
