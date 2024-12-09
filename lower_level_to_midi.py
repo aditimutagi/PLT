@@ -99,9 +99,11 @@ class MIDI_LowerLevel:
             pygame.time.Clock().tick(10)  # Wait until the music finishes
 
     def zip_midi_file(self, midi_file_path, shareable_file = "shareable_midi_files.zip"):
-        with zipfile.ZipFile(shareable_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        shareable_file_path = os.path.join(self.output_dir, shareable_file)
+        with zipfile.ZipFile(shareable_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             zipf.write(midi_file_path, os.path.basename(midi_file_path))
-        print(f"File {midi_file_path} zipped as {shareable_file}. You can share it via email.")
+        print(f"File {midi_file_path} zipped as {shareable_file_path}. You can share it via email.")
+
 
 
 
