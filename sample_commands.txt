@@ -1,0 +1,49 @@
+Sample Output Commands
+
+./script.sh 'play C1 1.0 E#8 0.5 1.3'     
+<PLAY, play>
+<NOTE, C1>
+<DURATION, 1.0>
+<NOTE, E#8>
+<DURATION, 0.5>
+<TEMPO, 1.3>
+Accepted
+
+./script.sh 'play C4 1.0 D4 0.5 chord (C4 D4) 0.75 1.3 save share'
+<PLAY, play>
+<NOTE, C4>
+<DURATION, 1.0>
+<NOTE, D4>
+<DURATION, 0.5>
+<CHORD, chord>
+<CHORD, C4 D4>
+<DURATION, 0.75>
+<TEMPO, 1.3>
+<SAVE, save>
+<SHARE, share>
+Accepted
+
+./script.sh 'play C4 D4 1.0 1.3 share' 
+<PLAY, play>
+<NOTE, C4>
+Rejected: Invalid token sequence at 'D4'
+
+./script.sh 'play C4 1.0 D4 0.5 chord (C4, D4, X3) 1.0 1.3 share'
+<PLAY, play>
+<NOTE, C4>
+<DURATION, 1.0>
+<NOTE, D4>
+<DURATION, 0.5>
+Rejected: Invalid note 'X3' in chord
+
+./script.sh 'play C4 1.0 D4 0.5 chord (C4, D4) 1.0 1.3 repeat loud share' 
+<PLAY, play>
+<NOTE, C4>
+<DURATION, 1.0>
+<NOTE, D4>
+<DURATION, 0.5>
+<CHORD, chord>
+<CHORD, C4 D4>
+<DURATION, 1.0>
+<TEMPO, 1.3>
+Rejected: Invalid token 'repeat'
