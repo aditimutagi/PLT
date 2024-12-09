@@ -50,7 +50,6 @@ class MIDI_LowerLevel:
             if action == "TEMPO":
                 # If we encounter a tempo, process the previous sequence with the current tempo
                 current_tempo = int(tokens[1])
-                print(current_tempo)
                 if current_sequence:
                     if current_tempo is None:
                         raise ValueError("A TEMPO must be set before notes or chords.")

@@ -100,8 +100,6 @@ class AST_Parser:
         elif not(self.match("NOTE") or self.match("CHORD")):
             raise ValueError("Invalid Composition")
         while self.match("NOTE") or self.match("CHORD"):
-            print(self.tokens[self.current_index][0])
-            print(self.current_state)
             expected_state = self.transition(self.current_state, self.tokens[self.current_index][0])
             if expected_state == 'Serr':
                 raise ValueError(f"Incorrect sequence at '{self.tokens[self.current_index][1]}'")
