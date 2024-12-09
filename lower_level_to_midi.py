@@ -98,7 +98,7 @@ class MIDI_LowerLevel:
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)  # Wait until the music finishes
 
-    def zip_midi_file(self, midi_file_path, shareable_file = "shareable_midi_files.zip"):
+    def zip_midi_file(self, midi_file_path, shareable_file = "shareable_output.zip"):
         shareable_file_path = os.path.join(self.output_dir, shareable_file)
         with zipfile.ZipFile(shareable_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             zipf.write(midi_file_path, os.path.basename(midi_file_path))
