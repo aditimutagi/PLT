@@ -237,7 +237,20 @@ S:
 ![My Image](img/AST.png)
 
 ## AST Optimization
-TO DO
+
+1. **Conversion of Single-Element Chords to Note Elements**  
+   - **Description**: Chords that contain only one element are converted into a note element. This simplification reduces complexity in the data structure.
+   - **Benefits**:  
+     - Improved processing efficiency.  
+     - Reduced overhead in handling chord elements when they are effectively singular notes.  
+     - Basic simplification of expressions, leading to clearer and more concise code.  
+
+2. **Removal of Note/Chord Elements with Zero Duration**  
+   - **Description**: Any note or chord element that has a duration of `0.0` is removed from the parsed output. These elements do not contribute to the musical content and can clutter the structure.  
+   - **Benefits**:  
+     - Cleaner output structure.  
+     - Enhanced performance by eliminating unnecessary elements, reducing memory usage and processing time.  
+     - Removal of redundant and dead code from the generated code.
 
 ## Lower Level Language
 The Lower Level Language serves as an intermediary step between the AST and the MIDI file format. It provides a structured way to represent musical instructions that can be easily converted into MIDI data.
